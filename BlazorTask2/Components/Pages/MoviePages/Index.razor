@@ -11,15 +11,41 @@
     <a href="movies/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="DB.Movie">
-    <PropertyColumn Property="movie => movie.Title" />
-    <PropertyColumn Property="movie => movie.Description" />
-    <PropertyColumn Property="movie => movie.ReleaseDate" />
-    <PropertyColumn Property="movie => movie.Rate" />
 
-    <TemplateColumn Context="movie">
-        <a href="@($"movies/edit?id={movie.Id}")">Edit</a> |
-        <a href="@($"movies/details?id={movie.Id}")">Details</a> |
-        <a href="@($"movies/delete?id={movie.Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+<div class="container">
+    <div>
+        <QuickGrid Class="table" Items="SortedMovies">
+            <PropertyColumn Property="movie => movie.Title" Sortable="true" />@* 
+            <PropertyColumn Property="movie => movie.Description" Sortable="true" /> *@
+            <PropertyColumn Property="movie => movie.ReleaseDate" Format="dd-MM-yyyy" Sortable="true" />
+            <PropertyColumn Property="movie => movie.AverageRate" Sortable="true" />
+            
+            <TemplateColumn Context="movie">
+                <a href="@($"movies/details?id={movie.Id}")">Details</a>
+                <AuthorizeView>
+                    <Authorized>
+                        | <a href="@($"movies/edit?id={movie.Id}")"> Edit</a> |
+                        <a href="@($"movies/delete?id={movie.Id}")">Delete</a>
+                    </Authorized>   
+                </AuthorizeView>               
+            </TemplateColumn>      
+        </QuickGrid>
+    </div>    
+</div>
+
+
+@code{
+    private IQueryable<Movie> SortedMovies = Enumerable.Empty<Movie>().AsQueryable();
+
+    protected override async Task OnInitializedAsync()
+    {
+        SortedMovies = DB.Movie;
+        await base.OnInitializedAsync();
+    }
+
+    private void SortMovies()
+    {
+        SortedMovies = SortedMovies.OrderBy(m => m.Title);
+    }
+
+}

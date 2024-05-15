@@ -11,41 +11,73 @@
 <div>
     <h4>Movie</h4>
     <hr />
-    @if (movie is null)
+    @if (Movie is null)
     {
         <p><em>Loading...</em></p>
     }
     else {
-        <dl class="row">
-            <dt class="col-sm-2">Title</dt>
-            <dd class="col-sm-10">@movie.Title</dd>
-            <dt class="col-sm-2">Description</dt>
-            <dd class="col-sm-10">@movie.Description</dd>
-            <dt class="col-sm-2">ReleaseDate</dt>
-            <dd class="col-sm-10">@movie.ReleaseDate</dd>
-            <dt class="col-sm-2">Rate</dt>
-            <dd class="col-sm-10">@movie.Rate</dd>
-        </dl>
-        <div>
-            <a href="@($"/movies/edit?id={movie.Id}")">Edit</a> |
-            <a href="@($"/movies")">Back to List</a>
+        <div class="container">
+            <span class="row">
+               
+                <dl class="col">
+                    <dt class="col-sm-2">Title</dt>
+                    <dd class="col-sm-10">@Movie.Title</dd>
+                    <dt class="col-sm-2">Description</dt>
+                    <dd class="col-sm-10">@Movie.Description</dd>
+                    <dt class="col-sm-2">Release Date</dt>
+                    <dd class="col-sm-10">@Movie.ReleaseDate</dd>
+                    <dt class="col-sm-2">Rate</dt>
+                    <dd class="col-sm-10">@Movie.AverageRate</dd>
+                </dl>
+                <img src="@Movie.Url" alt="@Movie.Title image" style="width: 200px; height: 200px;" />
+            </span>
+            <div>
+                <div class="row-10">
+                    <EditForm method="post" Model="Movie" FormName="edit" OnSubmit=@UpdateRating>
+                        <label for="movieRating">Rate:</label>
+                        <InputNumber id="movieRating" min="1" max="10" @bind-Value="Rating" />
+                        <button type="submit" class="btn btn-outline-primary mt-2 mb-1">Submit</button>
+                    </EditForm>
+                </div>
+            </div>
+            <div>
+                <a href="@($"/movies")">Back to List</a>
+            </div>
+           
         </div>
+        
+        
     }
 </div>
 
 @code {
-    Movie? movie;
+    Movie? Movie;
 
     [SupplyParameterFromQuery]
     public int Id { get; set; }
 
+    [SupplyParameterFromForm]
+    public int Rating { get; set; } = new();
+
     protected override async Task OnInitializedAsync()
     {
-        movie = await DB.Movie.FirstOrDefaultAsync(m => m.Id == Id);
-
-        if (movie is null)
+        Movie = await DB.Movie.FirstOrDefaultAsync(m => m.Id == Id);
+        if (Movie is null)
         {
             NavigationManager.NavigateTo("notfound");
         }
+    }
+
+    private async Task UpdateRating()
+    {
+        Movie.Rate += (float?)Rating;
+        Movie.NumberOfRates++;
+
+        await DB.SaveChangesAsync();
+        Console.WriteLine(Movie.Rate);
+        Console.WriteLine(Rating);
+        Console.WriteLine(Movie.NumberOfRates);
+        NavigationManager.NavigateTo("/movies");
+        StateHasChanged();
     }
 }

@@ -3,6 +3,8 @@
 @using BlazorTask2.Components
 @inject NavigationManager NavigationManager
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <PageTitle>Delete</PageTitle>
 
@@ -31,7 +33,7 @@
         </dl>
         <dl class="row">
             <dt class="col-sm-2">Rate</dt>
-            <dd class="col-sm-10">@movie.Rate</dd>
+            <dd class="col-sm-10">@movie.AverageRate</dd>
         </dl>
         <EditForm method="post" Model="movie" OnValidSubmit="DeleteMovie" FormName="delete" Enhance>
             <button type="submit" class="btn btn-danger" disabled="@(movie is null)">Delete</button> |

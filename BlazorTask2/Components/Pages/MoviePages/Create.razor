@@ -2,6 +2,8 @@
 @inject BlazorTask2.Data.ApplicationDbContext DB
 @using BlazorTask2.Components
 @inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <PageTitle>Create</PageTitle>
 
@@ -31,10 +33,16 @@
             </div>        
             <div class="mb-3">
                 <label for="rate" class="form-label">Rate:</label> 
-                <InputNumber id="rate" @bind-Value="Movie.Rate" class="form-control" /> 
+                <InputNumber id="rate" @bind-Value="Movie.Rate" min="1" max="10" class="form-control" /> 
                 <ValidationMessage For="() => Movie.Rate" class="text-danger" /> 
-            </div>        
+            </div>
+            <div class="mb-3">
+                <label for="url" class="form-label">Image URL:</label>
+                <InputText id="url" @bind-Value="Movie.Url" class="form-control" />
+                <ValidationMessage For="() => Movie.Url" class="text-danger" />
+            </div>
             <button type="submit" class="btn btn-primary">Create</button>
+
         </EditForm>
     </div>
 </div>
@@ -51,8 +59,15 @@
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
     public async Task AddMovie()
     {
-        DB.Movie.Add(Movie);
-        await DB.SaveChangesAsync();
-        NavigationManager.NavigateTo("/movies");
+        bool AlreadyExists = DB.Movie.Any(m => m.Title == Movie.Title);
+        if (!AlreadyExists)
+        {
+            Movie.NumberOfRates = 1;
+            DB.Movie.Add(Movie);
+            await DB.SaveChangesAsync();
+            NavigationManager.NavigateTo("/movies");
+        }
+        else return;
+
     }
 }

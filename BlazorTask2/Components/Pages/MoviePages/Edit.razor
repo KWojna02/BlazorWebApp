@@ -3,6 +3,8 @@
 @using BlazorTask2.Components
 @inject NavigationManager NavigationManager
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <PageTitle>Edit</PageTitle>
 
@@ -39,8 +41,13 @@ else
                 </div>
                 <div class="mb-3">
                     <label for="rate" class="form-label">Rate:</label>
-                    <InputNumber id="rate" @bind-Value="Movie.Rate" class="form-control" />
+                    <InputNumber id="rate" @bind-Value="Movie.Rate" class="form-control" min="1" max="10"/>
                     <ValidationMessage For="() => Movie.Rate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="url" class="form-label">Image URL:</label>
+                    <InputText id="url" @bind-Value="Movie.Url" class="form-control" />
+                    <ValidationMessage For="() => Movie.Url" class="text-danger" />
                 </div>
                 <button type="submit" class="btn btn-primary">Save</button>
             </EditForm>
@@ -73,8 +80,7 @@ else
     // For more details, see https://aka.ms/RazorPagesCRUD.
     public async Task UpdateMovie()
     {
-        DB.Attach(Movie!).State = EntityState.Modified;
-
+        DB.Attach(Movie!).State = EntityState.Modified;       
         try
         {
             await DB.SaveChangesAsync();
